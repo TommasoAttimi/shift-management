@@ -8,6 +8,7 @@ import ShiftList from "./pages/ShiftList";
 import ShiftForm from "./pages/ShiftForm";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
           <Route path="/shifts" element={<ShiftList />} />
           <Route path="/shift/new" element={<ShiftForm />} />
         </Routes>
+        <Footer />
       </Router>
     </AuthProvider>
   );
