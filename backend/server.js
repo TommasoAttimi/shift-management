@@ -12,7 +12,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: [
+      "http://localhost:3001",
+      "https://shift-management-app.netlify.app",
+    ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
