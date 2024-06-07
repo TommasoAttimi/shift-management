@@ -1,9 +1,7 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
 
 const ShiftForm = ({ shift, onSave }) => {
-  const { user } = useContext(AuthContext);
   const [date, setDate] = useState(shift ? shift.date.split("T")[0] : "");
   const [startTime, setStartTime] = useState(shift ? shift.startTime : "");
   const [endTime, setEndTime] = useState(shift ? shift.endTime : "");
@@ -61,16 +59,12 @@ const ShiftForm = ({ shift, onSave }) => {
     } else {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.post(
-          "http://localhost:3000/api/shifts",
-          shiftData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        window.location.reload(); // Ricarica la pagina per mostrare i nuovi turni
+        await axios.post("http://localhost:3000/api/shifts", shiftData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        window.location.reload();
       } catch (err) {
         console.error(err);
       }
