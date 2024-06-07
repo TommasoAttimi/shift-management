@@ -8,9 +8,19 @@ const ShiftList = () => {
 
   useEffect(() => {
     const fetchShifts = async () => {
-      const response = await axios.get("/api/shifts");
-      setShifts(response.data);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get("http://localhost:3000/api/shifts", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setShifts(response.data);
+      } catch (error) {
+        console.error("Error fetching shifts:", error);
+      }
     };
+
     fetchShifts();
   }, []);
 

@@ -1,0 +1,44 @@
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+
+const Navbar = () => {
+  const { user, logout } = useContext(AuthContext);
+
+  return (
+    <nav className="bg-gray-800 p-4">
+      <div className="container mx-auto flex justify-between items-center">
+        <Link to="/" className="text-white text-lg font-bold">
+          Shift Management
+        </Link>
+        <div className="flex space-x-4">
+          {!user && (
+            <>
+              <Link to="/register" className="text-white">
+                Register
+              </Link>
+              <Link to="/login" className="text-white">
+                Login
+              </Link>
+            </>
+          )}
+          {user && (
+            <>
+              <Link to="/dashboard" className="text-white">
+                Dashboard
+              </Link>
+              <Link to="/shifts" className="text-white">
+                Shifts
+              </Link>
+              <button onClick={logout} className="text-white">
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

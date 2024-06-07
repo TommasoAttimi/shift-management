@@ -1,27 +1,59 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const ShiftForm = ({ history }) => {
+const ShiftForm = () => {
   const { user } = useContext(AuthContext);
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [isAvailable, setIsAvailable] = useState(true);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:3000/api/users/employees",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setEmployees(response.data);
+      } catch (err) {
+        console.error("Error fetching employees:", err);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/shifts", {
-        user: user._id,
-        date,
-        startTime,
-        endTime,
-        isAvailable,
-      });
-      history.push("/shifts");
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:3000/api/shifts",
+        {
+          user: selectedEmployee,
+          date,
+          startTime,
+          endTime,
+          isAvailable,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      window.location.reload(); // Ricarica la pagina per mostrare i nuovi turni
     } catch (err) {
-      console.error(err);
+      console.error("Error creating shift:", err);
     }
   };
 
@@ -29,6 +61,28 @@ const ShiftForm = ({ history }) => {
     <div className="container mx-auto">
       <h2 className="text-2xl font-bold text-center mt-6">Create Shift</h2>
       <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-6">
+        <div className="mb-4">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="employee"
+          >
+            Employee
+          </label>
+          <select
+            id="employee"
+            value={selectedEmployee}
+            onChange={(e) => setSelectedEmployee(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          >
+            <option value="">Select an Employee</option>
+            {employees.map((employee) => (
+              <option key={employee._id} value={employee._id}>
+                {employee.name} ({employee.email})
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
