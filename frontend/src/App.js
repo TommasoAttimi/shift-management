@@ -4,8 +4,6 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import ShiftList from "./pages/ShiftList";
-import ShiftForm from "./pages/ShiftForm";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -14,16 +12,18 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/shifts" element={<ShiftList />} />
-          <Route path="/shift/new" element={<ShiftForm />} />
-        </Routes>
-        <Footer />
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
       </Router>
     </AuthProvider>
   );

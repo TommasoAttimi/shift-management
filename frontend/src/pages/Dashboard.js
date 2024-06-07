@@ -125,7 +125,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto p-4 flex-grow">
       <h2 className="text-2xl font-bold text-center mt-6">Dashboard</h2>
       <div className="text-center mt-6">
         <p className="text-gray-700">Welcome, {user && user.name}</p>
