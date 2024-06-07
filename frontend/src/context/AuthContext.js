@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const AuthContext = createContext();
 
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       axios
-        .get("http://localhost:3000/api/auth/me")
+        .get(`${API_URL}/api/auth/me`)
         .then((response) => {
           setUser(response.data);
           setLoading(false);
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post("http://localhost:3000/api/auth/login", {
+    const response = await axios.post(`${API_URL}/api/auth/login`, {
       email,
       password,
     });
@@ -39,10 +40,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password, role) => {
-    const response = await axios.post(
-      "http://localhost:3000/api/auth/register",
-      { name, email, password, role }
-    );
+    const response = await axios.post(`${API_URL}/api/auth/register`, {
+      name,
+      email,
+      password,
+      role,
+    });
     localStorage.setItem("token", response.data.token);
     axios.defaults.headers.common[
       "Authorization"
@@ -55,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       try {
-        const response = await axios.get("http://localhost:3000/api/auth/me");
+        const response = await axios.get(`${API_URL}/api/auth/me`);
         setUser(response.data);
       } catch (error) {
         localStorage.removeItem("token");

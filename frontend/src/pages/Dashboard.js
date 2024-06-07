@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import ShiftForm from "./ShiftForm";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Dashboard = () => {
   const { user, fetchUser, logout } = useContext(AuthContext);
@@ -15,7 +16,7 @@ const Dashboard = () => {
 
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:3000/api/shifts", {
+        const response = await axios.get(`${API_URL}/api/shifts`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -46,7 +47,7 @@ const Dashboard = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:3000/api/shifts/${id}`, {
+      await axios.delete(`${API_URL}/api/shifts/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -66,7 +67,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.put(
-        `http://localhost:3000/api/shifts/${updatedShift._id}`,
+        `${API_URL}/api/shifts/${updatedShift._id}`,
         updatedShift,
         {
           headers: {

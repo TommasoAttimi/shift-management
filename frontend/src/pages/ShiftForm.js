@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const ShiftForm = ({ shift, onSave }) => {
   const [date, setDate] = useState(shift ? shift.date.split("T")[0] : "");
@@ -17,14 +18,11 @@ const ShiftForm = ({ shift, onSave }) => {
     const fetchEmployees = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          "http://localhost:3000/api/users/employees",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${API_URL}/api/users/employees`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setEmployees(response.data);
       } catch (err) {
         console.error(err);
@@ -59,7 +57,7 @@ const ShiftForm = ({ shift, onSave }) => {
     } else {
       try {
         const token = localStorage.getItem("token");
-        await axios.post("http://localhost:3000/api/shifts", shiftData, {
+        await axios.post(`${API_URL}/api/shifts`, shiftData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -8,7 +8,7 @@ const ShiftList = () => {
     const fetchShifts = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:3000/api/shifts", {
+        const response = await axios.get(`${API_URL}/api/shifts`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
