@@ -2,14 +2,18 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const ShiftForm = () => {
+const ShiftForm = ({ shift, onSave, addShift }) => {
   const { user } = useContext(AuthContext);
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [date, setDate] = useState(shift ? shift.date.split("T")[0] : "");
+  const [startTime, setStartTime] = useState(shift ? shift.startTime : "");
+  const [endTime, setEndTime] = useState(shift ? shift.endTime : "");
+  const [isAvailable, setIsAvailable] = useState(
+    shift ? shift.isAvailable : true
+  );
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState(
+    shift ? shift.user._id : ""
+  );
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -25,41 +29,59 @@ const ShiftForm = () => {
         );
         setEmployees(response.data);
       } catch (err) {
-        console.error("Error fetching employees:", err);
+        console.error(err);
       }
     };
 
     fetchEmployees();
   }, []);
 
+  useEffect(() => {
+    if (shift) {
+      setDate(shift.date.split("T")[0]);
+      setStartTime(shift.startTime);
+      setEndTime(shift.endTime);
+      setIsAvailable(shift.isAvailable);
+      setSelectedEmployee(shift.user._id);
+    }
+  }, [shift]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:3000/api/shifts",
-        {
-          user: selectedEmployee,
-          date,
-          startTime,
-          endTime,
-          isAvailable,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      window.location.reload(); // Ricarica la pagina per mostrare i nuovi turni
-    } catch (err) {
-      console.error("Error creating shift:", err);
+    const shiftData = {
+      user: selectedEmployee,
+      date,
+      startTime,
+      endTime,
+      isAvailable,
+    };
+
+    if (shift) {
+      onSave({ ...shiftData, _id: shift._id });
+    } else {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.post(
+          "http://localhost:3000/api/shifts",
+          shiftData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        addShift(response.data);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl font-bold text-center mt-6">Create Shift</h2>
+      <h2 className="text-2xl font-bold text-center mt-6">
+        {shift ? "Edit Shift" : "Create Shift"}
+      </h2>
       <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-6">
         <div className="mb-4">
           <label
@@ -153,7 +175,7 @@ const ShiftForm = () => {
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Create
+            {shift ? "Save" : "Create"}
           </button>
         </div>
       </form>

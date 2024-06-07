@@ -24,25 +24,17 @@ exports.getShifts = async (req, res) => {
 };
 
 exports.updateShift = async (req, res) => {
-  const { id } = req.params;
-  const { user, date, startTime, endTime, isAvailable } = req.body;
-
   try {
-    let shift = await Shift.findById(id);
+    const { id } = req.params;
+    const { date, startTime, endTime, isAvailable, user } = req.body;
 
-    if (!shift) {
-      return res.status(404).json({ msg: "Shift not found" });
-    }
+    const updatedShift = await Shift.findByIdAndUpdate(
+      id,
+      { date, startTime, endTime, isAvailable, user },
+      { new: true }
+    );
 
-    shift.user = user || shift.user;
-    shift.date = date || shift.date;
-    shift.startTime = startTime || shift.startTime;
-    shift.endTime = endTime || shift.endTime;
-    shift.isAvailable =
-      isAvailable !== undefined ? isAvailable : shift.isAvailable;
-
-    await shift.save();
-    res.json(shift);
+    res.json(updatedShift);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -50,17 +42,12 @@ exports.updateShift = async (req, res) => {
 };
 
 exports.deleteShift = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const shift = await Shift.findById(id);
+    const { id } = req.params;
 
-    if (!shift) {
-      return res.status(404).json({ msg: "Shift not found" });
-    }
+    await Shift.findByIdAndDelete(id);
 
-    await shift.remove();
-    res.json({ msg: "Shift removed" });
+    res.json({ msg: "Shift deleted" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");

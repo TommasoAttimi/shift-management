@@ -6,6 +6,7 @@ import ShiftForm from "./ShiftForm";
 const Dashboard = () => {
   const { user, fetchUser, logout } = useContext(AuthContext);
   const [shifts, setShifts] = useState([]);
+  const [editingShift, setEditingShift] = useState(null);
 
   useEffect(() => {
     const fetchShifts = async () => {
@@ -36,6 +37,79 @@ const Dashboard = () => {
     window.location.href = "/login";
   };
 
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this shift?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:3000/api/shifts/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setShifts(shifts.filter((shift) => shift._id !== id));
+    } catch (error) {
+      console.error("Error deleting shift:", error);
+    }
+  };
+
+  const handleEdit = (shift) => {
+    setEditingShift(shift);
+  };
+
+  const handleSave = async (updatedShift) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `http://localhost:3000/api/shifts/${updatedShift._id}`,
+        updatedShift,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setShifts(
+        shifts.map((shift) =>
+          shift._id === updatedShift._id ? response.data : shift
+        )
+      );
+      setEditingShift(null);
+    } catch (error) {
+      console.error("Error updating shift:", error);
+    }
+  };
+
+  const daysOfWeek = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const groupShiftsByDay = (shifts) => {
+    const grouped = {};
+    daysOfWeek.forEach((day) => {
+      grouped[day] = [];
+    });
+    shifts.forEach((shift) => {
+      const shiftDate = new Date(shift.date);
+      const dayName = daysOfWeek[shiftDate.getDay() - 1];
+      if (dayName) {
+        grouped[dayName].push(shift);
+      }
+    });
+    return grouped;
+  };
+
+  const groupedShifts = groupShiftsByDay(shifts);
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -55,34 +129,56 @@ const Dashboard = () => {
       <div className="mt-6">
         {user.role === "manager" && (
           <div>
-            <h3 className="text-xl font-bold">Manage Shifts</h3>
-            <ShiftForm />
-            <ul>
-              {shifts.map((shift) => (
-                <li
-                  key={shift._id}
-                  className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-                >
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {new Date(shift.date).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <strong>Start Time:</strong> {shift.startTime}
-                  </p>
-                  <p>
-                    <strong>End Time:</strong> {shift.endTime}
-                  </p>
-                  <p>
-                    <strong>User:</strong> {shift.user.name}
-                  </p>
-                  <p>
-                    <strong>Available:</strong>{" "}
-                    {shift.isAvailable ? "Yes" : "No"}
-                  </p>
-                </li>
+            {editingShift ? (
+              <ShiftForm shift={editingShift} onSave={handleSave} />
+            ) : (
+              <ShiftForm />
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {daysOfWeek.map((day) => (
+                <div key={day} className="bg-gray-100 shadow-md rounded p-4">
+                  <h3 className="text-xl font-bold mb-4">{day}</h3>
+                  {groupedShifts[day].length === 0 ? (
+                    <p className="text-gray-500">No shifts</p>
+                  ) : (
+                    groupedShifts[day]
+                      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                      .map((shift) => (
+                        <div
+                          key={shift._id}
+                          className="bg-white shadow-md rounded px-4 py-2 mb-2"
+                        >
+                          <p>
+                            <strong>Start Time:</strong> {shift.startTime}
+                          </p>
+                          <p>
+                            <strong>End Time:</strong> {shift.endTime}
+                          </p>
+                          <p>
+                            <strong>User:</strong> {shift.user.name}
+                          </p>
+                          <p>
+                            <strong>Available:</strong>{" "}
+                            {shift.isAvailable ? "Yes" : "No"}
+                          </p>
+                          <button
+                            onClick={() => handleEdit(shift)}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2 mr-2"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(shift._id)}
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))
+                  )}
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
         {user.role === "employee" && (
