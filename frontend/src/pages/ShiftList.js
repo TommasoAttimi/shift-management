@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 
-const ShiftList = ({ addShift }) => {
+const ShiftList = () => {
   const [shifts, setShifts] = useState([]);
 
   useEffect(() => {
