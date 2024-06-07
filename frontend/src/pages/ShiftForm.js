@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const ShiftForm = ({ shift, onSave, addShift }) => {
+const ShiftForm = ({ shift, onSave }) => {
   const { user } = useContext(AuthContext);
   const [date, setDate] = useState(shift ? shift.date.split("T")[0] : "");
   const [startTime, setStartTime] = useState(shift ? shift.startTime : "");
@@ -70,7 +70,7 @@ const ShiftForm = ({ shift, onSave, addShift }) => {
             },
           }
         );
-        addShift(response.data);
+        window.location.reload(); // Ricarica la pagina per mostrare i nuovi turni
       } catch (err) {
         console.error(err);
       }

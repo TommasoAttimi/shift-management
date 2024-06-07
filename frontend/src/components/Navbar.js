@@ -14,27 +14,21 @@ const Navbar = () => {
         <div className="flex space-x-4">
           {!user && (
             <>
-              <Link to="/register" className="text-white">
+              <Link
+                to="/register"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
                 Register
               </Link>
-              <Link to="/login" className="text-white">
+              <Link
+                to="/login"
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              >
                 Login
               </Link>
             </>
           )}
-          {user && (
-            <>
-              <Link to="/dashboard" className="text-white">
-                Dashboard
-              </Link>
-              <Link to="/shifts" className="text-white">
-                Shifts
-              </Link>
-              <button onClick={logout} className="text-white">
-                Logout
-              </button>
-            </>
-          )}
+          {user && <></>}
         </div>
       </div>
     </nav>

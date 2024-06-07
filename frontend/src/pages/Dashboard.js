@@ -7,6 +7,7 @@ const Dashboard = () => {
   const { user, fetchUser, logout } = useContext(AuthContext);
   const [shifts, setShifts] = useState([]);
   const [editingShift, setEditingShift] = useState(null);
+  const [showShiftForm, setShowShiftForm] = useState(false);
 
   useEffect(() => {
     const fetchShifts = async () => {
@@ -58,6 +59,7 @@ const Dashboard = () => {
 
   const handleEdit = (shift) => {
     setEditingShift(shift);
+    setShowShiftForm(true);
   };
 
   const handleSave = async (updatedShift) => {
@@ -78,9 +80,15 @@ const Dashboard = () => {
         )
       );
       setEditingShift(null);
+      setShowShiftForm(false);
     } catch (error) {
       console.error("Error updating shift:", error);
     }
+  };
+
+  const handleCreate = () => {
+    setEditingShift(null);
+    setShowShiftForm(true);
   };
 
   const daysOfWeek = [
@@ -100,7 +108,8 @@ const Dashboard = () => {
     });
     shifts.forEach((shift) => {
       const shiftDate = new Date(shift.date);
-      const dayName = daysOfWeek[shiftDate.getDay() - 1];
+      const dayName =
+        daysOfWeek[shiftDate.getDay() === 0 ? 6 : shiftDate.getDay() - 1];
       if (dayName) {
         grouped[dayName].push(shift);
       }
@@ -129,10 +138,14 @@ const Dashboard = () => {
       <div className="mt-6">
         {user.role === "manager" && (
           <div>
-            {editingShift ? (
+            <button
+              onClick={handleCreate}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4"
+            >
+              Create New Shift
+            </button>
+            {showShiftForm && (
               <ShiftForm shift={editingShift} onSave={handleSave} />
-            ) : (
-              <ShiftForm />
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
               {daysOfWeek.map((day) => (
@@ -148,6 +161,10 @@ const Dashboard = () => {
                           key={shift._id}
                           className="bg-white shadow-md rounded px-4 py-2 mb-2"
                         >
+                          <p>
+                            <strong>Date:</strong>{" "}
+                            {new Date(shift.date).toLocaleDateString()}
+                          </p>
                           <p>
                             <strong>Start Time:</strong> {shift.startTime}
                           </p>
@@ -183,32 +200,41 @@ const Dashboard = () => {
         )}
         {user.role === "employee" && (
           <div>
-            <h3 className="text-xl font-bold">Your Shifts</h3>
-            <ul>
-              {shifts
-                .filter((shift) => shift.user._id === user._id)
-                .map((shift) => (
-                  <li
-                    key={shift._id}
-                    className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-                  >
-                    <p>
-                      <strong>Date:</strong>{" "}
-                      {new Date(shift.date).toLocaleDateString()}
-                    </p>
-                    <p>
-                      <strong>Start Time:</strong> {shift.startTime}
-                    </p>
-                    <p>
-                      <strong>End Time:</strong> {shift.endTime}
-                    </p>
-                    <p>
-                      <strong>Available:</strong>{" "}
-                      {shift.isAvailable ? "Yes" : "No"}
-                    </p>
-                  </li>
-                ))}
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+              {daysOfWeek.map((day) => (
+                <div key={day} className="bg-gray-100 shadow-md rounded p-4">
+                  <h3 className="text-xl font-bold mb-4">{day}</h3>
+                  {groupedShifts[day].length === 0 ? (
+                    <p className="text-gray-500">No shifts</p>
+                  ) : (
+                    groupedShifts[day]
+                      .filter((shift) => shift.user._id === user._id)
+                      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                      .map((shift) => (
+                        <div
+                          key={shift._id}
+                          className="bg-white shadow-md rounded px-4 py-2 mb-2"
+                        >
+                          <p>
+                            <strong>Date:</strong>{" "}
+                            {new Date(shift.date).toLocaleDateString()}
+                          </p>
+                          <p>
+                            <strong>Start Time:</strong> {shift.startTime}
+                          </p>
+                          <p>
+                            <strong>End Time:</strong> {shift.endTime}
+                          </p>
+                          <p>
+                            <strong>Available:</strong>{" "}
+                            {shift.isAvailable ? "Yes" : "No"}
+                          </p>
+                        </div>
+                      ))
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
